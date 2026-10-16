@@ -7,7 +7,7 @@ the engine layer is fixed scaffolding, the game layer is the part you rewrite.
 ```bash
 pnpm install
 pnpm dev      # http://localhost:5173
-pnpm build    # typecheck + production build + JS/font budgets + total-size report
+pnpm build    # typecheck + production build + bundle budget
 pnpm test     # unit tests (rules, save, i18n, level)
 pnpm smoke    # after build: headless browser playthrough + screenshots in shots/
 ```
@@ -40,14 +40,13 @@ pnpm smoke    # after build: headless browser playthrough + screenshots in shots
 - **Rules stay pure.** Scoring, win/lose and progression go in `rules.ts` with tests; scene code
   reports events and reads state.
 - **Every visible string is an i18n key** in both `en.json` and `zh-CN.json` (a test enforces
-  matching keys and placeholders). English and Chinese use the bundled Manus CC0 fonts in `public/fonts/`;
+  matching keys and placeholders). Chinese glyphs come from the subset font in `public/fonts/`;
   if you add new Chinese text, check it renders (missing glyphs fall back to system fonts).
 - **UI is HTML/CSS**, not canvas. Keep the game look: display font, outlined text, hard offset
   shadows, skewed buttons, notched panels. Menus must stay keyboard/gamepad navigable
   (`data-nav` on focusable controls).
 - **Colliders come from the helpers** in `physics.ts` with the same sizes as the meshes.
-- Keep `npm run build` within the JS/font budgets (`scripts/check-size.mjs`) and `npm run smoke` green.
-  Total game asset size is reported without a hard limit.
+- Keep `npm run build` within budget (`scripts/check-size.mjs`) and `npm run smoke` green.
 
 ## Controls
 
@@ -57,9 +56,7 @@ LB sprint, Start pause. Touch: left-side stick, right-side drag to look, JUMP / 
 
 ## Credits
 
-Fonts: ManusCC0 (regular, medium, bold) and ManusCC0 Sans CJK SC — CC0 1.0.
-The bundled Chinese font preserves its 6,547-codepoint repertoire; no font download is required.
-See `public/fonts/ManusCC0-LICENSE.txt`.
+Fonts: Sora, Figtree, Noto Sans SC — SIL Open Font License 1.1 (see `public/fonts/*-OFL.txt`).
 Libraries: three.js (MIT), Rapier (Apache-2.0).
 
 ## Preview Tweak

@@ -14,7 +14,11 @@ export default defineConfig(({ mode }) => {
       host: env.HOST ?? '127.0.0.1', port, strictPort: true,
       allowedHosts: ['.manuspre.computer', '.manus.computer', '.manus-asia.computer', '.manuscomputer.ai', '.manusvm.computer', 'localhost', '127.0.0.1'],
     },
-    build: { target: 'es2022', assetsInlineLimit: 0, chunkSizeWarningLimit: 4600, sourcemap: false },
+    build: {
+      target: 'es2022', assetsInlineLimit: 0, chunkSizeWarningLimit: 4600, sourcemap: false,
+      // Two pages: the game and the standalone on-chain leaderboard.
+      rollupOptions: { input: { main: 'index.html', leaderboard: 'leaderboard.html' } },
+    },
     test: { environment: 'node', include: ['tests/**/*.test.{ts,mjs}'] },
   }
 })

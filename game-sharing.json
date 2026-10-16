@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 2,
+  "title": "Hemi Wyrm",
+  "description": "Dirige un ver cosmique dans une arène spatiale 3D, dévore des logos Hemi pour grandir et grave ton meilleur score on-chain sur Hemi Network. Leaderboard public par adresse 0x.",
+  "defaultCaptions": {
+    "x": "Je viens de graver mon score on-chain dans Hemi Wyrm 🪐 Dévore les logos Hemi, grandis, et bats-moi sur le leaderboard Hemi !",
+    "facebook": "Hemi Wyrm : un jeu de ver spatial en 3D sur le thème de Hemi Network. Une transaction pour lancer la partie, une autre pour enregistrer ton score on-chain.",
+    "reddit": "Hemi Wyrm — un snake 3D dans l'espace où chaque partie est une session on-chain sur Hemi Sepolia, avec un leaderboard public par adresse 0x.",
+    "discord": "Viens jouer à Hemi Wyrm : dévore des logos Hemi, grandis et grave ton score sur Hemi. Bats mon record on-chain !"
+  },
+  "assets": {
+    "og": "assets/share/og.png",
+    "favicon": "assets/share/favicon.png"
+  }
+}

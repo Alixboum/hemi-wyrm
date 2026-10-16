@@ -2,3 +2,15 @@ node_modules/
 dist/
 shots/
 /.manus-webdev/preview-identity.json
+NOTES.local.md
+
+# local scratch
+shots/
+.shots.mjs
+.menus.mjs
+NOTES.local.md
+.threats.mjs
+.bite.mjs
+# Assets restored from assets.lock.json
+/assets/share/favicon.png
+/assets/share/og.png

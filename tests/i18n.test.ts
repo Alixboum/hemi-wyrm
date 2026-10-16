@@ -1,27 +1,22 @@
 import { describe, expect, it } from 'vitest'
 import en from '../src/i18n/en.json'
-import zh from '../src/i18n/zh-CN.json'
+import fr from '../src/i18n/fr.json'
 import { detectLocale, resolveLocale } from '../src/engine/i18n'
 
 describe('i18n', () => {
-  it('detects Chinese browsers and defaults to English', () => {
-    expect(detectLocale(['zh-CN', 'en'])).toBe('zh-CN')
-    expect(detectLocale(['zh-TW'])).toBe('zh-CN')
-    expect(detectLocale(['ZH'])).toBe('zh-CN')
-    expect(detectLocale(['en-US', 'zh-CN'])).toBe('en')
-    expect(detectLocale([])).toBe('en')
-    expect(detectLocale(undefined)).toBe('en')
+  it('defaults to French', () => {
+    expect(detectLocale(['fr-FR'])).toBe('fr')
+    expect(detectLocale(['en-US', 'fr'])).toBe('fr')
+    expect(detectLocale(undefined)).toBe('fr')
   })
-
   it('lets a saved choice win over detection', () => {
-    expect(resolveLocale('en', ['zh-CN'])).toBe('en')
-    expect(resolveLocale('zh-CN', ['en-US'])).toBe('zh-CN')
-    expect(resolveLocale('', ['zh-CN'])).toBe('zh-CN')
+    expect(resolveLocale('en', ['fr-FR'])).toBe('en')
+    expect(resolveLocale('fr', ['en-US'])).toBe('fr')
+    expect(resolveLocale('', ['en-US'])).toBe('fr')
   })
-
-  it('has the same keys and placeholders in every language', () => {
-    expect(Object.keys(zh).sort()).toEqual(Object.keys(en).sort())
+  it('has the same keys and placeholders in both languages', () => {
+    expect(Object.keys(en).sort()).toEqual(Object.keys(fr).sort())
     const vars = (s: string) => (s.match(/\{\w+\}/g) ?? []).sort()
-    for (const [key, value] of Object.entries(en)) expect(vars((zh as Record<string, string>)[key]), key).toEqual(vars(value))
+    for (const [key, value] of Object.entries(fr)) expect(vars((en as Record<string, string>)[key]), key).toEqual(vars(value))
   })
 })
