@@ -1,4 +1,4 @@
-// Compile and (optionally) deploy the HemiWyrmArcade contract to Hemi Sepolia.
+// Compile and (optionally) deploy the HemiWyrmArcade contract to Hemi (NETWORK=mainnet, default) or Hemi Sepolia (NETWORK=sepolia).
 //   node scripts/contract.mjs compile          -> writes src/chain/artifact.json
 //   DEPLOYER_PRIVATE_KEY=0x... node scripts/contract.mjs deploy
 //     -> deploys and writes the address into src/chain/deployment.json
@@ -13,12 +13,12 @@ const SOURCE = 'contracts/HemiWyrmArcade.sol'
 const ARTIFACT = 'src/chain/artifact.json'
 const DEPLOYMENT = 'src/chain/deployment.json'
 
-const hemiSepolia = {
-  id: 743111,
-  name: 'Hemi Sepolia',
-  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-  rpcUrls: { default: { http: ['https://testnet.rpc.hemi.network/rpc'] } },
+const NETWORKS = {
+  mainnet: { id: 43111, name: 'Hemi', nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.hemi.network/rpc'] } }, explorer: 'https://explorer.hemi.xyz' },
+  sepolia: { id: 743111, name: 'Hemi Sepolia', nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: { default: { http: ['https://testnet.rpc.hemi.network/rpc'] } }, explorer: 'https://testnet.explorer.hemi.xyz' },
 }
+const hemi = NETWORKS[process.env.NETWORK ?? 'mainnet']
+if (!hemi) throw new Error('NETWORK must be mainnet or sepolia')
 
 function compile() {
   const input = {
@@ -45,17 +45,19 @@ async function deploy() {
   const key = process.env.DEPLOYER_PRIVATE_KEY
   if (!key) throw new Error('DEPLOYER_PRIVATE_KEY is required')
   const account = privateKeyToAccount(key)
-  const transport = http(hemiSepolia.rpcUrls.default.http[0])
-  const pub = createPublicClient({ chain: hemiSepolia, transport })
-  const wallet = createWalletClient({ chain: hemiSepolia, transport, account })
+  const transport = http(hemi.rpcUrls.default.http[0])
+  const pub = createPublicClient({ chain: hemi, transport })
+  const wallet = createWalletClient({ chain: hemi, transport, account })
   const balance = await pub.getBalance({ address: account.address })
   console.log(`deployer ${account.address} balance ${balance} wei`)
   const hash = await wallet.deployContract({ abi: artifact.abi, bytecode: artifact.bytecode })
   console.log(`tx ${hash}`)
   const receipt = await pub.waitForTransactionReceipt({ hash })
   if (!receipt.contractAddress) throw new Error('deployment failed')
-  writeFileSync(DEPLOYMENT, JSON.stringify({ chainId: hemiSepolia.id, address: receipt.contractAddress, txHash: hash, block: Number(receipt.blockNumber) }, null, 2) + '\n')
-  console.log(`deployed at ${receipt.contractAddress}`)
+  const all = JSON.parse(readFileSync(DEPLOYMENT, 'utf8'))
+  all[String(hemi.id)] = { address: receipt.contractAddress, txHash: hash, block: Number(receipt.blockNumber) }
+  writeFileSync(DEPLOYMENT, JSON.stringify(all, null, 2) + '\n')
+  console.log(`deployed at ${receipt.contractAddress} on ${hemi.name} -> ${hemi.explorer}/address/${receipt.contractAddress}`)
 }
 
 const cmd = process.argv[2] ?? 'compile'

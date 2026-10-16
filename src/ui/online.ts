@@ -1,5 +1,5 @@
 /**
- * On-chain session layer. Every life is one session on Hemi Sepolia:
+ * On-chain session layer. Every life is one session on the active Hemi network:
  *   1. `open()`   — startSession() transaction, required before the worm spawns;
  *   2. `submit()` — submitScore(sessionId, peakLength) transaction once the worm dies.
  * The leaderboard is read straight from the contract.

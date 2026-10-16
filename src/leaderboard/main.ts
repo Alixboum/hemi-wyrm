@@ -1,9 +1,9 @@
 /**
  * Standalone on-chain leaderboard page. Reads every player's best score from the
- * HemiWyrmArcade contract on Hemi Sepolia and ranks them by 0x address.
+ * HemiWyrmArcade contract on the active Hemi network and ranks them by 0x address.
  */
 import './style.css'
-import { CONTRACT, explorerAddress, HemiChain, shortAddress, type BoardEntry, type BoardStats } from '../chain/hemi'
+import { CONTRACT, NETWORK_LABEL, explorerAddress, HemiChain, shortAddress, type BoardEntry, type BoardStats } from '../chain/hemi'
 import { hemiMarkSvg } from './mark'
 import favicon from '../../assets/share/favicon.png'
 
@@ -25,7 +25,7 @@ const TEXT: Record<Lang, Record<string, string>> = {
     loading: 'Lecture du contrat sur Hemi…', empty: 'Aucun score on-chain pour l\u2019instant — lance une partie et sois le premier !',
     error: 'Impossible de lire le contrat Hemi pour le moment. Réessaie dans un instant.', noContract: 'Le contrat du jeu n\u2019est pas encore déployé.',
     you: 'toi', yourRank: 'Ton rang : #{rank} · meilleur score {n}', notRanked: 'Ton adresse n\u2019a pas encore de score enregistré.',
-    updated: 'Mis à jour à {t}', noMatch: 'Aucune adresse ne correspond.', network: 'Hemi Sepolia · chainId 743111',
+    updated: 'Mis à jour à {t}', noMatch: 'Aucune adresse ne correspond.', network: NETWORK_LABEL,
   },
   en: {
     title: 'On-chain leaderboard', sub: 'The best scores recorded on Hemi Network, address by address.',
@@ -35,7 +35,7 @@ const TEXT: Record<Lang, Record<string, string>> = {
     loading: 'Reading the contract on Hemi…', empty: 'No on-chain scores yet — start a game and be the first!',
     error: 'Could not read the Hemi contract right now. Try again in a moment.', noContract: 'The game contract is not deployed yet.',
     you: 'you', yourRank: 'Your rank: #{rank} · best score {n}', notRanked: 'Your address has no recorded score yet.',
-    updated: 'Updated at {t}', noMatch: 'No address matches.', network: 'Hemi Sepolia · chainId 743111',
+    updated: 'Updated at {t}', noMatch: 'No address matches.', network: NETWORK_LABEL,
   },
 }
 

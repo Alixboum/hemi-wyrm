@@ -4,24 +4,22 @@
  * The contract lives in `contracts/HemiWyrmArcade.sol`; its address is in `deployment.json`.
  */
 import {
-  createPublicClient, createWalletClient, custom, decodeEventLog, defineChain, http, getAddress,
+  createPublicClient, createWalletClient, custom, decodeEventLog, http, getAddress,
   type Address, type Hash, type PublicClient, type WalletClient,
 } from 'viem'
 import artifact from './artifact.json'
-import deployment from './deployment.json'
+import deployments from './deployment.json'
+import { HEMI } from './networks'
 
-export const HEMI_SEPOLIA = defineChain({
-  id: 743111,
-  name: 'Hemi Sepolia',
-  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-  rpcUrls: { default: { http: ['https://testnet.rpc.hemi.network/rpc'] } },
-  blockExplorers: { default: { name: 'Hemi Explorer', url: 'https://testnet.explorer.hemi.xyz' } },
-  testnet: true,
-})
+export { HEMI, NETWORK_LABEL, BRIDGE_URL } from './networks'
 
 export const ABI = artifact.abi as typeof artifact.abi
 export const BYTECODE = artifact.bytecode as `0x${string}`
-export const CONTRACT: Address | null = deployment.address ? getAddress(deployment.address) : null
+type Deployment = { address: string; txHash: string; block: number } | null
+const deployment = (deployments as Record<string, Deployment>)[String(HEMI.id)] ?? null
+export const CONTRACT: Address | null = deployment?.address ? getAddress(deployment.address) : null
+/** Block of the contract deployment (lower bound for log queries). */
+export const DEPLOY_BLOCK = BigInt(deployment?.block ?? 0)
 
 export type BoardEntry = { rank: number; address: Address; best: number; last: number; games: number; bestAt: number }
 export type BoardStats = { players: number; totalGames: number; sessions: number }
@@ -35,8 +33,8 @@ export class ChainError extends Error {
 }
 
 export const shortAddress = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`
-export const explorerTx = (hash: string) => `${HEMI_SEPOLIA.blockExplorers.default.url}/tx/${hash}`
-export const explorerAddress = (a: string) => `${HEMI_SEPOLIA.blockExplorers.default.url}/address/${a}`
+export const explorerTx = (hash: string) => `${HEMI.blockExplorers.default.url}/tx/${hash}`
+export const explorerAddress = (a: string) => `${HEMI.blockExplorers.default.url}/address/${a}`
 
 function provider(): Eip1193 | null {
   return ((window as unknown as { ethereum?: Eip1193 }).ethereum) ?? null
@@ -48,7 +46,7 @@ export function classify(err: unknown): ChainError {
   const e = err as { code?: number; name?: string; shortMessage?: string; message?: string; cause?: unknown }
   const text = `${e?.name ?? ''} ${e?.shortMessage ?? ''} ${e?.message ?? ''}`.toLowerCase()
   if (e?.code === 4001 || text.includes('user rejected') || text.includes('user denied') || text.includes('rejected the request')) return new ChainError('rejected')
-  if (text.includes('insufficient funds')) return new ChainError('funds')
+  if (/insufficient (funds|balance)|exceeds the balance|gas required exceeds|not enough (funds|balance)/.test(text)) return new ChainError('funds')
   if (text.includes('revert')) return new ChainError('reverted', e?.shortMessage)
   return new ChainError('network', e?.shortMessage ?? e?.message)
 }
@@ -60,7 +58,7 @@ export class HemiChain {
   private listeners = new Set<(account: Address | null) => void>()
 
   constructor() {
-    this.publicClient = createPublicClient({ chain: HEMI_SEPOLIA, transport: http() }) as PublicClient
+    this.publicClient = createPublicClient({ chain: HEMI, transport: http(undefined, { retryCount: 4, retryDelay: 400 }), pollingInterval: 1500 }) as PublicClient
     const eth = provider()
     if (eth?.on) {
       eth.on('accountsChanged', (accs: unknown) => {
@@ -97,7 +95,7 @@ export class HemiChain {
   private walletClient(): WalletClient {
     const eth = provider()
     if (!eth) throw new ChainError('no-wallet')
-    if (!this.wallet) this.wallet = createWalletClient({ chain: HEMI_SEPOLIA, transport: custom(eth) })
+    if (!this.wallet) this.wallet = createWalletClient({ chain: HEMI, transport: custom(eth) })
     return this.wallet
   }
 
@@ -115,13 +113,13 @@ export class HemiChain {
     }
   }
 
-  /** Makes sure the wallet is on Hemi Sepolia, adding the network if the wallet does not know it. */
+  /** Makes sure the wallet is on the active Hemi network, adding the network if the wallet does not know it. */
   async ensureNetwork(): Promise<void> {
     const eth = provider()
     if (!eth) throw new ChainError('no-wallet')
-    const hex = `0x${HEMI_SEPOLIA.id.toString(16)}`
+    const hex = `0x${HEMI.id.toString(16)}`
     const current = (await eth.request({ method: 'eth_chainId' })) as string
-    if (parseInt(current, 16) === HEMI_SEPOLIA.id) return
+    if (parseInt(current, 16) === HEMI.id) return
     try {
       await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: hex }] })
     } catch (err) {
@@ -132,8 +130,8 @@ export class HemiChain {
         await eth.request({
           method: 'wallet_addEthereumChain',
           params: [{
-            chainId: hex, chainName: HEMI_SEPOLIA.name, nativeCurrency: HEMI_SEPOLIA.nativeCurrency,
-            rpcUrls: HEMI_SEPOLIA.rpcUrls.default.http, blockExplorerUrls: [HEMI_SEPOLIA.blockExplorers.default.url],
+            chainId: hex, chainName: HEMI.name, nativeCurrency: HEMI.nativeCurrency,
+            rpcUrls: HEMI.rpcUrls.default.http, blockExplorerUrls: [HEMI.blockExplorers.default.url],
           }],
         })
       } catch (addErr) {
@@ -153,7 +151,7 @@ export class HemiChain {
   async startSession(onSent?: (hash: Hash) => void): Promise<{ sessionId: bigint; hash: Hash }> {
     const account = await this.prepare()
     try {
-      const hash = await this.walletClient().writeContract({ address: CONTRACT!, abi: ABI, functionName: 'startSession', account, chain: HEMI_SEPOLIA })
+      const hash = await this.walletClient().writeContract({ address: CONTRACT!, abi: ABI, functionName: 'startSession', account, chain: HEMI })
       onSent?.(hash)
       const receipt = await this.publicClient.waitForTransactionReceipt({ hash })
       if (receipt.status !== 'success') throw new ChainError('reverted')
@@ -175,7 +173,7 @@ export class HemiChain {
     const account = await this.prepare()
     try {
       const hash = await this.walletClient().writeContract({
-        address: CONTRACT!, abi: ABI, functionName: 'submitScore', args: [sessionId, BigInt(Math.max(0, Math.floor(score)))], account, chain: HEMI_SEPOLIA,
+        address: CONTRACT!, abi: ABI, functionName: 'submitScore', args: [sessionId, BigInt(Math.max(0, Math.floor(score)))], account, chain: HEMI,
       })
       onSent?.(hash)
       const receipt = await this.publicClient.waitForTransactionReceipt({ hash })
@@ -225,7 +223,7 @@ export class HemiChain {
     const account = this.account ?? (await this.connect())
     await this.ensureNetwork()
     try {
-      const hash = await this.walletClient().deployContract({ abi: ABI, bytecode: BYTECODE, account, chain: HEMI_SEPOLIA })
+      const hash = await this.walletClient().deployContract({ abi: ABI, bytecode: BYTECODE, account, chain: HEMI })
       const receipt = await this.publicClient.waitForTransactionReceipt({ hash })
       if (!receipt.contractAddress) throw new ChainError('reverted')
       return { address: getAddress(receipt.contractAddress), hash }

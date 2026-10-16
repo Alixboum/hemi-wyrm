@@ -16,7 +16,7 @@ import { Minimap } from './minimap'
 import { Sparks } from './sparks'
 import { assets } from '../engine/assets'
 import type { Online, OnlineOutcome, SessionStep } from './online'
-import { CONTRACT, explorerAddress, explorerTx, shortAddress, type ChainError } from '../chain/hemi'
+import { BRIDGE_URL, CONTRACT, NETWORK_LABEL, explorerAddress, explorerTx, shortAddress, type ChainError } from '../chain/hemi'
 
 /** Hemi Network mark (disc split by a tapered cut) as inline SVG. */
 let markId = 0
@@ -525,7 +525,8 @@ export class Ui {
     card.classList.add('is-error')
     this.bind('chainStep', this.t(`chain.err.${code}`))
     this.root.querySelector<HTMLElement>('[data-bind="chainTx"]')!.innerHTML = code === 'no-wallet'
-      ? '<a href="https://metamask.io/download/" target="_blank" rel="noopener">metamask.io</a>' : ''
+      ? '<a href="https://metamask.io/download/" target="_blank" rel="noopener">metamask.io</a>'
+      : code === 'funds' ? `<a href="${BRIDGE_URL}" target="_blank" rel="noopener">${esc(this.t('chain.bridge'))}</a>` : ''
     if (this.screen !== 'chain') this.show('chain')
     this.root.querySelector<HTMLElement>('[data-action="chain-retry"]')?.focus({ preventScroll: true })
     return new Promise(resolve => {
@@ -611,7 +612,7 @@ export class Ui {
         ${rows ? `<table class="board"><thead><tr><th>${esc(this.t('records.col.rank'))}</th><th>${esc(this.t('records.col.name'))}</th><th>${esc(this.t('records.col.length'))}</th><th>${esc(this.t('records.col.kills'))}</th><th>${esc(this.t('records.col.mode'))}</th></tr></thead><tbody>${rows}</tbody></table>` : `<p class="empty">${esc(this.t('records.empty'))}</p>`}`
     } else {
       el.innerHTML = `
-        <p class="contract-line">${hemiMarkSvg('hemi-mark')} Hemi Sepolia · ${CONTRACT ? `<a href="${explorerAddress(CONTRACT)}" target="_blank" rel="noopener">${esc(shortAddress(CONTRACT))}</a>` : '—'}</p>
+        <p class="contract-line">${hemiMarkSvg('hemi-mark')} ${esc(NETWORK_LABEL)} · ${CONTRACT ? `<a href="${explorerAddress(CONTRACT)}" target="_blank" rel="noopener">${esc(shortAddress(CONTRACT))}</a>` : '—'}</p>
         <div class="global" data-bind="global"><p class="empty">${esc(this.t('records.loading'))}</p></div>
         <div class="actions"><button class="btn ghost small" data-action="refresh-global">${esc(this.t('records.refresh'))}</button><button class="btn small" data-action="leaderboard">${icon('trophy')}${esc(this.t('records.openBoard'))}</button></div>`
       this.loadGlobal()

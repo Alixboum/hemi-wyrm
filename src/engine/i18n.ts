@@ -20,6 +20,9 @@ export function resolveLocale(saved: Locale | '', languages: readonly string[] |
   return saved === 'fr' || saved === 'en' ? saved : detectLocale(languages)
 }
 
+/** Values available to every string as {name} placeholders (e.g. {net} = active Hemi network). */
+export const I18N_GLOBALS: Record<string, string> = {}
+
 export class I18n {
   locale: Locale
   private listeners = new Set<(locale: Locale) => void>()
@@ -29,6 +32,7 @@ export class I18n {
   }
   /** Look up `key`, replacing `{name}` placeholders. Missing keys render the key so gaps are visible. */
   t(key: string, vars: Record<string, string | number> = {}): string {
+    vars = { ...I18N_GLOBALS, ...vars }
     const text = DICTIONARIES[this.locale][key] ?? DICTIONARIES.fr[key] ?? key
     return text.replace(/\{(\w+)\}/g, (_, name: string) => String(vars[name] ?? `{${name}}`))
   }

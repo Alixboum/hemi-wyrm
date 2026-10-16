@@ -19,7 +19,7 @@
   "devDependencies": {
     "@types/three": "^0.186.0",
     "playwright": "^1.63.0",
-    "solc": "^0.8.37",
+    "solc": "^0.8.36",
     "typescript": "^5.9.3",
     "vite": "^8.3.1",
     "vitest": "^5.0.2"

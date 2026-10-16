@@ -1,7 +1,7 @@
 import './styles/main.css'
 import { assets } from './engine/assets'
 import { Audio } from './engine/audio'
-import { I18n, resolveLocale } from './engine/i18n'
+import { I18N_GLOBALS, I18n, resolveLocale } from './engine/i18n'
 import { Input } from './engine/input'
 import { GameLoop } from './engine/loop'
 import { purchaseSkin, SAVE_KEY, SaveStore, type SaveData } from './engine/save'
@@ -10,6 +10,9 @@ import type { HintId } from './game/threats'
 import { applyLife, insertLife, stardustForLife, type Mode } from './game/rules'
 import { tuning } from './game/tuning'
 import { classify } from './chain/hemi'
+import { HEMI } from './chain/networks'
+
+I18N_GLOBALS.net = HEMI.name
 import { Online } from './ui/online'
 import { TouchControls } from './ui/touch'
 import { Ui } from './ui/ui'
