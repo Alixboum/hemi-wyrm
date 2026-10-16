@@ -50,19 +50,29 @@ async function boot(): Promise<void> {
 
   let starting = false
   /** On-chain transaction #1: loops on the session screen until it succeeds or the player cancels. */
+  let sessionId = 0n
   const openSession = async (): Promise<boolean> => {
     // Development-only escape hatch for visual testing without a wallet (stripped from production builds).
     if (import.meta.env.DEV && new URLSearchParams(location.search).has('nochain')) return true
     for (;;) {
       try {
-        const id = await online.open((step, hash) => ui.showChain(step, hash))
-        ui.toast('chain.ready', { id: id.toString() }, 'good')
+        sessionId = await online.open((step, hash) => ui.showChain(step, hash))
         return true
       } catch (err) {
         const choice = await ui.chainError(classify(err).code)
         if (choice === 'cancel') return false
       }
     }
+  }
+  /** After the start transaction: the worm waits frozen in the arena until the player presses Launch. */
+  const awaitLaunch = async () => {
+    if (!game) return
+    game.pause()
+    await ui.showReady(sessionId.toString())
+    game.resume()
+    audio.play('start')
+    ui.show('hud')
+    loop.resetAccumulator()
   }
   const play = async (mode: Mode) => {
     if (!game || starting) return
@@ -92,9 +102,9 @@ async function boot(): Promise<void> {
     match = { bestLife: 0, earned: 0 }
     game.start(mode)
     audio.setScene('arena')
-    audio.play('start')
-    ui.show('hud')
-    loop.resetAccumulator()
+    starting = true
+    await awaitLaunch()
+    starting = false
   }
   const pause = () => {
     if (!game || (game.mode !== 'playing' && !(game.mode === 'dead' && game.sim.mode === 'team'))) return
@@ -121,8 +131,9 @@ async function boot(): Promise<void> {
         return
       }
       game.respawn()
-      ui.show('hud')
-      loop.resetAccumulator()
+      starting = true
+      await awaitLaunch()
+      starting = false
     },
     retryScore: () => {
       void online.retry(o => ui.setOnline(o))

@@ -70,7 +70,9 @@ export const skinById = (id: string): Skin => SKINS.find(s => s.id === id) ?? SK
 /** Team palettes used for halos, minimap dots and the team score bar. */
 export const TEAM_COLORS = [0x4fb8ff, 0xff8a3d] as const
 
+/** Rival worm names (community players). */
 export const BOT_NAMES = [
-  'Nova', 'Quasar', 'Orbit', 'Vega', 'Lyra', 'Zenith', 'Comet', 'Nebby', 'Halo', 'Rigel', 'Sirius', 'Io',
-  'Titan', 'Pulse', 'Astra', 'Cosmo', 'Ember', 'Kepler', 'Draco', 'Mira', 'Solstice', 'Umbra', 'Photon', 'Echo',
+  'Rick', 'Joshua', 'Max', 'JCV', 'Alix', 'Creator', 'Jeremy', 'Yahuze',
+  'Excalibur', 'Clayton', 'Jeff', 'Matthew', 'Ajeet', 'Daniel', 'Likoidk', 'Foxstar',
+  'Avijit', 'Anubis', 'Alpha!', 'Uttam', 'Hesuxian', 'FunkySasquatch',
 ]

@@ -258,5 +258,9 @@
   "online.retry": "Retry recording",
   "records.col.address": "Address",
   "records.col.games": "Games",
-  "records.openBoard": "Open the full leaderboard"
+  "records.openBoard": "Open the full leaderboard",
+  "ready.title": "Session #{id} confirmed!",
+  "ready.text": "Your worm is in position in the arena. Launch it when you're ready.",
+  "ready.go": "Launch the worm",
+  "ready.hint": "or press Space / Enter"
 }

@@ -533,3 +533,12 @@ body.reduced-motion .tarrow.urgent .chev::before { animation: none; box-shadow: 
 .contract-line { display: flex; align-items: center; gap: 8px; margin: 0; color: var(--muted); }
 .board tr.me td { color: #ffb27a; font-weight: 700; }
 .card .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* Launch gate after the start transaction: the frozen arena stays visible behind the card. */
+.ready-screen { background: radial-gradient(60% 50% at 50% 50%, rgba(11, 8, 6, 0.35), rgba(11, 8, 6, 0.7)); }
+.ready-card { text-align: center; align-items: center; }
+.ready-card .launch { font-size: 20px; padding: 16px 34px; margin-top: 6px; animation: launch-pulse 1.4s ease-in-out infinite; }
+@keyframes launch-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 70, 0, 0.55); } 50% { box-shadow: 0 0 0 14px rgba(255, 70, 0, 0); } }
+.ready-hint { color: var(--muted); font-size: 13px; margin: 0; }
+.screen.ready-screen { justify-content: center; align-items: flex-end; padding-bottom: calc(7vh + var(--safe-b)); background: linear-gradient(180deg, transparent 45%, rgba(11, 8, 6, 0.75)); }
+.ready-card { max-width: 440px; }

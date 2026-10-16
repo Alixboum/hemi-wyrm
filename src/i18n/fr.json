@@ -258,5 +258,9 @@
   "records.openBoard": "Ouvrir le leaderboard complet",
   "lang.en": "English",
   "title.language": "Langue",
-  "settings.language": "Langue"
+  "settings.language": "Langue",
+  "ready.title": "Session #{id} validée !",
+  "ready.text": "Ton ver est en position dans l'arène. Lance-le quand tu es prêt.",
+  "ready.go": "Lancer le ver",
+  "ready.hint": "ou appuie sur Espace / Entrée"
 }

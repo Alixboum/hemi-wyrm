@@ -25,7 +25,7 @@ export function hemiMarkSvg(cls = 'hemi-mark'): string {
   return `<svg class="${cls}" viewBox="0 0 100 100" aria-hidden="true"><defs><mask id="${id}"><rect width="100" height="100" fill="#fff"/><path d="M41 -1H59L53 37H47Z M41 101H59L53 63H47Z" fill="#000"/></mask></defs><circle cx="50" cy="50" r="50" fill="#FF4600" mask="url(#${id})"/></svg>`
 }
 
-export type Screen = 'boot' | 'loading' | 'chain' | 'title' | 'hud' | 'pause' | 'settings' | 'skins' | 'records' | 'howto' | 'death' | 'match'
+export type Screen = 'boot' | 'loading' | 'chain' | 'ready' | 'title' | 'hud' | 'pause' | 'settings' | 'skins' | 'records' | 'howto' | 'death' | 'match'
 
 export type UiActions = {
   play(mode: Mode): void
@@ -71,6 +71,7 @@ export class Ui {
   private lastDeath: DeathInfo | null = null
   private lastOnline: OnlineOutcome | null = null
   private chainChoice: ((v: 'retry' | 'cancel') => void) | null = null
+  private launchResolve: (() => void) | null = null
   private lastMatch: { result: MatchResult; bestLife: number; earned: number } | null = null
   private hudCache = new Map<string, string>()
   private sparks!: Sparks
@@ -134,6 +135,14 @@ export class Ui {
             <button class="btn primary" data-action="chain-retry">${T('chain.retry')}</button>
             <button class="btn ghost" data-action="chain-cancel">${T('chain.cancel')}</button>
           </div>
+        </div>
+      </section>
+      <section class="screen menu ready-screen" data-screen="ready">
+        <div class="panel card narrow ready-card">
+          <div class="chain-head">${hemiMarkSvg('hemi-mark')}<h2 data-bind="readyTitle"></h2></div>
+          <p class="chain-intro" data-i18n="ready.text"></p>
+          <button class="btn primary big launch" data-action="launch">${icon('play')}${T('ready.go')}</button>
+          <p class="ready-hint" data-i18n="ready.hint"></p>
         </div>
       </section>
       <section class="screen title" data-screen="title">
@@ -371,6 +380,9 @@ export class Ui {
       case 'retry-score':
         this.actions.retryScore()
         return
+      case 'launch':
+        this.launchResolve?.()
+        return
       case 'chain-retry':
         this.chainChoice?.('retry')
         return
@@ -483,6 +495,28 @@ export class Ui {
     const tx = this.root.querySelector<HTMLElement>('[data-bind="chainTx"]')!
     tx.innerHTML = hash ? `<a href="${explorerTx(hash)}" target="_blank" rel="noopener">${esc(this.t('chain.viewTx'))} · ${esc(shortAddress(hash))}</a>` : ''
     if (this.screen !== 'chain') this.show('chain')
+  }
+
+  /** "Launch" gate shown once the start transaction is confirmed; resolves on button, Space or Enter. */
+  showReady(sessionId: string): Promise<void> {
+    this.bind('readyTitle', this.t('ready.title', { id: sessionId }))
+    this.show('ready')
+    this.root.querySelector<HTMLElement>('[data-action="launch"]')?.focus({ preventScroll: true })
+    return new Promise(resolve => {
+      const onKey = (e: KeyboardEvent) => {
+        if (e.code !== 'Space' && e.code !== 'Enter' && e.code !== 'NumpadEnter') return
+        e.preventDefault()
+        e.stopPropagation()
+        done()
+      }
+      const done = () => {
+        window.removeEventListener('keydown', onKey, true)
+        this.launchResolve = null
+        resolve()
+      }
+      window.addEventListener('keydown', onKey, true)
+      this.launchResolve = done
+    })
   }
 
   /** Session screen error state; resolves with the player's choice. */
