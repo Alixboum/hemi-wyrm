@@ -90,3 +90,21 @@ resets it only at the next run using that run's active values. `Game` snapshots 
 `RunState.unranked`; local results cannot save such runs. Preserve this guard when changing
 scoring. When adding online leaderboards, skip submissions for unranked runs and enforce
 eligibility in the authoritative server too; client flags are not proof of a fair score.
+
+## Hemi Wyrm on Hemi Mainnet
+
+- Contract: `HemiWyrmArcade` at `0xc8b0ccd8ab0126707e770eed4a2aba7f2a84db88` on Hemi Mainnet (chainId 43111), verified (exact match, MIT): https://explorer.hemi.xyz/address/0xC8B0CcD8AB0126707E770eEd4a2ABa7F2a84db88?tab=contract
+- Source: `contracts/HemiWyrmArcade.sol`. No owner, no payable function, no token approvals: `startSession()` opens a run, `submitScore(sessionId, score)` records it.
+- Leaderboard: `leaderboard.html`, read directly from the contract.
+
+## License
+
+MIT, see `LICENSE`.
+
+## Third-party credits
+
+- Fonts: Sora, Figtree, Noto Sans SC (SIL Open Font License 1.1, see `public/fonts/*-OFL.txt`).
+- Particle sprites: Kenney Particle Pack and Smoke Particles by Kenney (kenney.nl), CC0.
+- Base game, art, music and SFX: remix of the Manus GameDev showcase "Ver de l'espace 3D" (AI-generated assets made with Manus).
+- Hemi name and logo: Hemi Labs brand assets, used to theme the game for the Hemi community.
+- Libraries: three.js (MIT), viem (MIT), Vite (MIT), solc-js (MIT).
